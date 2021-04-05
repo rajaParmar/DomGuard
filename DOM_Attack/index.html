@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title> Money Transfer </title>
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<meta charset="utf-8">
+ 	 <meta name="viewport" content="width=device-width, initial-scale=1">
+ 	 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+ 	 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+ 	 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+	 <script>
+		function postdetails() {
+			var inp1 = document.getElementById("AccountNo").value;
+			var inp2 = document.getElementById("Amount").value;
+			document.getElementById("acno").innerHTML=inp1;
+			document.getElementById("amt").innerHTML=inp2;
+		}
+	</script>
+   	<style>
+		body{
+			background-color : lightgrey;
+		}
+	</style>
+    </head>
+    <body>
+		<a name ="top_of_page"></a>
+        <h1> Money Transfer </h1>
+		<p id="displaydate" align="right"></p>
+		<script>
+			var a = new Date();
+			document.getElementById("displaydate").innerHTML = a;
+		</script>
+		<br>
+		<form id="formid">  
+			Account Number:  
+			<input type="text" id="AccountNo" name="AccountNo" size="20">  
+			<br> <br>  
+			Amount:  
+			<input type="text" id="Amount" name="Amount" size="15">
+		</form>  
+		<br> <br>  
+		<button id="SubmitButton" onclick="postdetails()">Submit</button>
+		<br> <br>
+		<p id="acno">Account Number</p>
+		<p id="amt">Amount</p>
+    </body>
+</html>
