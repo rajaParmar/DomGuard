@@ -1,21 +1,10 @@
 <html>
 
 <head>
-<!--<script src="code.js"></script>-->
 
 <script>
 	
-	// (function(global) {
-	// 	'use strict';
-	// 	// var undefined;
-		
-	// 	if (document.pid) {
-	// 		navigator.pid = navigator.mozId;
-	// 	} else {
-			// console.log("current document object:",document.pid);
 			(function(doc) {
-				// var undefined;
-				
 
 				// ************ Channel Class: This class controls the socket communication between client and server
 				// ************ and Handles Cryptographics primitive functions
@@ -28,11 +17,18 @@
 					var _socket = {};
 					var _decision = undefined;
 
-					function createWebCryptoKey(data) {
-						var keys = JSON.parse(data);
+					function hexToBytes(hex) {
+						for (var bytes = [], c = 0; c < hex.length; c += 2)
+							bytes.push(parseInt(hex.substr(c, 2), 16));
+						return bytes;
+					}
 
-						var rawPrivate = Convertor.raw2ab(keys.private.data);
-						console.log(keys.private.data);
+					function createWebCryptoKey(data) {
+						var keys = data.split(" ");
+						var privateKeyByteArray = hexToBytes(keys[0]);
+						var rawPrivate = Convertor.raw2ab(privateKeyByteArray);
+						console.log(rawPrivate);
+						
 						window.crypto.subtle.importKey(
 								"raw", //can be "jwk" (public or private), "spki" (public only), or "pkcs8" (private only)
 								rawPrivate, { //these are the algorithm options
@@ -43,7 +39,6 @@
 							)
 							.then(function(key) {
 								_privateKey = key;
-								console.log(_privateKey);
 							})
 							.catch(function(err) {
 								console.error(err);
@@ -68,40 +63,17 @@
 								console.error(err);
 							});
 
-						_iv = Convertor.raw2ab(keys.iv.data);
 					};
-					/* Not used in this protocol, for future?*/
-					// function analyseDecision(decision) {
-
-					// 	window.crypto.subtle.decrypt({
-					// 				name: "AES-CBC",
-					// 				iv: _iv,
-					// 			},
-					// 			_privateKey, //from generateKey or importKey above
-					// 			decision.content
-					// 		)
-					// 		.then(function(text) {
-					// 			console.log(Convertor.ab2str(text));
-					// 			console.log(decision.reason);
-					// 		})
-					// 		.catch(function(err) {
-					// 			console.error(err);
-					// 		});
-
-					// }
-					
+					var serverAddress = 'ws://localhost:9000'
 					function reconnect(){
 						_socket={};
-						while(_socket.readyState === undefined || _socket.readyState > 1) _socket = new WebSocket('wss://localhost:8080');
+						while(_socket.readyState === undefined || _socket.readyState > 1) _socket = new WebSocket(serverAddress);
 					}
 
 					function handshake() {
-						if (window.MozWebSocket) {
-							window.WebSocket = window.MozWebSocket;
-						}
 
 						if (_socket.readyState === undefined || _socket.readyState > 1) {
-							_socket = new WebSocket('wss://localhost:8080');    
+							_socket = new WebSocket(serverAddress);    
 							_socket.onopen = function () {
 
 							};
@@ -133,7 +105,6 @@
 									},
 								},
 								_digKey, //from generateKey or importKey above
-								//Convertor.concatab(Convertor.str2ab(pid), _nonce) //ArrayBuffer of data you want to sign
 								Convertor.str2ab(pid)
 							)
 							.then(function(signature) {
@@ -415,7 +386,7 @@
 										t = "5";
 										break;
 								}
-								_changes += t;                             
+								_changes += t;  
 							});
 						});
 
@@ -505,105 +476,8 @@
 				})();
 
 
-				var BrowserSupport = (function() {
-					var win = window,
-						nav = navigator,
-						reason;
-
-					// For unit testing
-					function setTestEnv(newNav, newWindow) {
-						nav = newNav;
-						win = newWindow;
-					}
-					function test(){
-						console.log("hello world");
-					}
-
-					function getInternetExplorerVersion() {
-						var rv = -1; // Return value assumes failure.
-						if (nav.appName == 'Microsoft Internet Explorer') {
-							var ua = nav.userAgent;
-							var re = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
-							if (re.exec(ua) != null)
-								rv = parseFloat(RegExp.$1);
-						}
-
-						return rv;
-					}
-
-					function checkIE() {
-						var ieVersion = getInternetExplorerVersion(),
-							ieNosupport = ieVersion > -1 && ieVersion < 8;
-
-						if (ieNosupport) {
-							return "BAD_IE_VERSION";
-						}
-					}
-
-					function explicitNosupport() {
-						return checkIE();
-					}
-
-					function checkWebCrypto() {
-						try {
-							var hasWebcrypto = 'crypto' in win
-								&& win['crypto'] !== null;
-
-							if (hasWebcrypto) {
-
-							} else {
-								return "WEBCRYPTO_NOT_SUPPORTED";
-							}
-						} catch (e) {
-							return "WEBCRYPTO_DISABLED";
-						}
-					}
-
-					function checkJSON() {
-						if (!(window.JSON && window.JSON.stringify && window.JSON.parse)) {
-							return "JSON_NOT_SUPPORTED";
-						}
-					}
-
-					function isSupported() {
-						reason = explicitNosupport() || checkWebCrypto() || checkJSON();
-
-						return !reason;
-					}
-
-
-					function getNoSupportReason() {
-						return reason;
-					}
-
-					return {
-						/**
-						 * Set the test environment.
-						 * @method setTestEnv
-						 */
-						setTestEnv: setTestEnv,
-						/**
-						 * Check whether the current browser is supported
-						 * @method isSupported
-						 * @returns {boolean}
-						 */
-						isSupported: isSupported,
-						/**
-						 * Called after isSupported, if isSupported returns false.  Gets the reason
-						 * why browser is not supported.
-						 * @method getNoSupportReason
-						 * @returns {string}
-						 */
-						getNoSupportReason: getNoSupportReason,
-
-						
-					
-					};
-				}());
-
 				//************************************* This is Start of Implementing Navigate things! :D
 				// I would call it document.pid for the start!
-				//var watch = undefined;
 				if (!document.pid) {
 
 					Observer.build();
@@ -614,42 +488,8 @@
 					document.pid = {};
 
 				}
-
-				if (!document.pid.request || document.pid._shimmed) {
-
 					
 					var waitingForDOM = false;
-					var browserSupported = BrowserSupport.isSupported();
-
-					function isSupported() {
-						return BrowserSupport.isSupported();
-					}
-
-					function noSupportReason() {
-						var reason = BrowserSupport.getNoSupportReason();
-						if (!reason) {
-							return REQUIRES_WATCH;
-						}
-					}
-
-					if (!isSupported()) {
-						var reason = noSupportReason();
-						var url = "unsupported_dialog";
-
-						if (reason === "WEBCRYPTO_DISABLED") {
-							url = "cookies_disabled";
-						} else if (reason === REQUIRES_WATCH) {
-							url = "unsupported_dialog_without_watch";
-						}
-						return;
-					}
-
-
-					function decisionReady(callback) {
-						if (callback() == undefined) {
-							callback();
-						}
-					}
 					
 					document.pid = {
 						request: function(options) {
@@ -659,15 +499,11 @@
 							var pid = Observer.export();
 							Channel.transfer(pid);
 
-						},
-						_shimmed: true
+						}
 					};
 					
-				}
 
 			}());
-		// }
-	// }(this));
 
 	</script>
 	<meta charset="UTF-8">
@@ -680,15 +516,11 @@
     <input id="last_name" type="text">
     <input id="buttonTest" value="Submit" type="button">
 
-    <p>helladsfasdf asf asdf as f asf a sf asf </p>
     <script>
 
-
-    //document.foo = 'team12';
-    //document.body.style.backgroundColor="green";
     document.getElementById("buttonTest").addEventListener("click",function(e)
         {
-            e.stopImmediatePropagation();
+            //e.stopImmediatePropagation();
             //console.log(e.isTrusted);
             document.pid.request();
         });
