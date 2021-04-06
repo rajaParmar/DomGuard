@@ -1,21 +1,487 @@
-<!DOCTYPE html>
 <html>
-    <head>
-        <title>WebSocket demo</title>
-    </head>
-    <body>
-        <script>
-            var ws = new WebSocket("ws://localhost:9000/"),
-                messages = document.createElement('ul');
-            ws.onmessage = function (event) {
-                var messages = document.getElementsByTagName('ul')[0],
-                    message = document.createElement('li'),
-                    content = document.createTextNode(event.data);
-                message.appendChild(content);
-                ws.send("hello from client");
-                messages.appendChild(message);
-            };
-            document.body.appendChild(messages);
-        </script>
-    </body>
+
+<head>
+
+<script>
+	
+			(function(doc) {
+
+				// ************ Channel Class: This class controls the socket communication between client and server
+				// ************ and Handles Cryptographics primitive functions
+
+				var Channel = (function() {
+					"use strict";
+					var _digKey = undefined;
+					var _socket = {};
+					var _decision = undefined;
+
+					function hexToBytes(hex) {
+						for (var bytes = [], c = 0; c < hex.length; c += 2)
+							bytes.push(parseInt(hex.substr(c, 2), 16));
+						return bytes;
+					}
+
+					function createWebCryptoKey(data) {
+						
+						var privateKeyByteArray = hexToBytes(data);
+						var rawPrivate = Convertor.raw2ab(privateKeyByteArray);
+
+						window.crypto.subtle.importKey(
+								"raw", //can be "jwk" (public or private), "spki" (public only), or "pkcs8" (private only)
+								rawPrivate, { //these are the algorithm options
+									name: "HMAC",
+									hash: {
+										name: "SHA-256"
+									},
+								},
+								false, //whether the key is extractable (i.e. can be used in exportKey)
+								["sign"] //"verify" for public key import, "sign" for private key imports
+							)
+							.then(function(key) {
+								_digKey = key;
+							})
+							.catch(function(err) {
+								console.error(err);
+							});
+
+					};
+
+					var serverAddress = 'ws://localhost:9000'
+					function reconnect(){
+						_socket={};
+						while(_socket.readyState === undefined || _socket.readyState > 1) _socket = new WebSocket(serverAddress);
+					}
+
+					function handshake() {
+
+						if (_socket.readyState === undefined || _socket.readyState > 1) {
+							_socket = new WebSocket(serverAddress);    
+							_socket.onopen = function () {
+							};
+
+							_socket.onmessage = function (msg) {
+								console.log(msg);
+								createWebCryptoKey(msg.data);
+							};
+							
+							_socket.onerror = function(event){                               
+								console.log("object socket error");
+								reconnect();
+							}
+
+							_socket.onclose = function (event) {
+								console.log("socket closed");
+								reconnect();
+							};
+						}
+
+					}
+
+
+					function sendPID(pid) {
+						window.crypto.subtle.sign({
+									name: "HMAC",
+									hash: {
+										name: "SHA-256"
+									},
+								},
+								_digKey, //from generateKey or importKey above
+								Convertor.str2ab(pid)
+							)
+							.then(function(signature) {
+								_socket.send(signature);
+							})
+							.catch(function(err) {
+								console.error(err);
+							});
+					}
+					return {
+						start: function() {
+							handshake();
+						},
+
+						transfer: function(pid) {
+							sendPID(pid);
+						},
+
+						getDecision: function() {
+							return _decision;
+						}
+					};
+				})();
+
+
+				/* START OF THE CLANNEL FROM HERE */
+
+				// Object.freeze(global.crypto.subtle);
+				// To make obj immutable, freeze each object in obj.
+				// To do so, we use this function.
+				// function deepFreeze(obj) {
+				// 	// Retrieve the property names defined on obj
+				// 	var propNames = Object.getOwnPropertyNames(obj);
+				// 	// Freeze properties before freezing self
+			
+
+				// 	propNames.forEach(function(name) {
+				// 		if (name != "url" && name != "binaryType" && name != "bufferedAmount" && name != "extensions" && name != "onclose" && name != "onerror" && name != "onmessage" && name != "onopen" && name != "protocol" && name != "readyState"){
+				// 			var prop = obj[name];
+				// 			// Freeze prop if it is an object
+				// 			if (typeof prop == 'object' && prop !== null)
+				// 				deepFreeze(prop);
+				// 		}
+				// 	});
+				// 	// Freeze self (no-op if already frozen)
+				// 	return Object.freeze(obj);
+				// }
+
+				
+				// var ws = deepFreeze(WebSocket);;
+				// var mo = deepFreeze(MutationObserver);;
+
+				Channel.start();
+
+				/* STOP DISPATCHING EVENT FOR ALL ELEMENTS */
+				var eventProtection = (function() {
+					var _eventList = ["abort",
+						"afterprint",
+						"animationend",
+						"animationiteration",
+						"animationstart",
+						"audioprocess",
+						"audioend",
+						"audiostart",
+						"beforeprint",
+						"beforeunload",
+						"beginEvent",
+						"blocked",
+						"blur",
+						"boundary",
+						"cached",
+						"canplay",
+						"canplaythrough",
+						"change",
+						"chargingchange",
+						"chargingtimechange",
+						"checking",
+						"click",
+						"close",
+						"complete",
+						"compositionend",
+						"compositionstart",
+						"compositionupdate",
+						"contextmenu",
+						"copy",
+						"cut",
+						"dblclick",
+						"devicelight",
+						"devicemotion",
+						"deviceorientation",
+						"deviceproximity",
+						"dischargingtimechange",
+						"DOMActivate",
+						"DOMAttributeNameChanged",
+						"DOMAttrModified",
+						"DOMCharacterDataModified",
+						"DOMContentLoaded",
+						"DOMElementNameChanged",
+						"DOMNodeInserted",
+						"DOMNodeInsertedIntoDocument",
+						"DOMNodeRemoved",
+						"DOMNodeRemovedFromDocument",
+						"DOMSubtreeModified",
+						"downloading",
+						"drag",
+						"dragend",
+						"dragenter",
+						"dragleave",
+						"dragover",
+						"dragstart",
+						"drop",
+						"durationchange",
+						"emptied",
+						"end ",
+						"ended",
+						"endEvent",
+						"focus",
+						"fullscreenchange",
+						"fullscreenerror",
+						"gamepadconnected",
+						"gamepaddisconnected",
+						"gotpointercapture",
+						"hashchange",
+						"lostpointercapture",
+						"input",
+						"invalid",
+						"keydown",
+						"keypress",
+						"keyup",
+						"languagechange",
+						"levelchange",
+						"load",
+						"loadeddata",
+						"loadedmetadata",
+						"loadend",
+						"loadstart",
+						"mark",
+						"message",
+						"mousedown",
+						"mouseenter",
+						"mouseleave",
+						"mousemove",
+						"mouseout",
+						"mouseover",
+						"mouseup",
+						"nomatch",
+						"notificationclick",
+						"noupdate",
+						"obsolete",
+						"offline",
+						"online",
+						"open",
+						"orientationchange",
+						"pagehide",
+						"pageshow",
+						"paste",
+						"pause",
+						"pointercancel",
+						"pointerdown",
+						"pointerenter",
+						"pointerleave",
+						"pointerlockchange",
+						"pointerlockerror",
+						"pointermove",
+						"pointerout",
+						"pointerover",
+						"pointerup",
+						"play",
+						"playing",
+						"popstate",
+						"progress",
+						"progress",
+						"push",
+						"pushsubscriptionchange",
+						"ratechange",
+						"readystatechange",
+						"repeatEvent",
+						"reset",
+						"resize",
+						"resourcetimingbufferfull",
+						"result",
+						"resume",
+						"scroll",
+						"seeked",
+						"seeking",
+						"select",
+						"selectstart",
+						"selectionchange",
+						"show",
+						"soundend",
+						"soundstart",
+						"speechend",
+						"speechstart",
+						"stalled",
+						"start",
+						"storage",
+						"submit",
+						"success",
+						"suspend",
+						"SVGAbort",
+						"SVGError",
+						"SVGLoad",
+						"SVGResize",
+						"SVGScroll",
+						"SVGUnload",
+						"SVGZoom",
+						"timeout",
+						"timeupdate",
+						"touchcancel",
+						"touchend",
+						"touchmove",
+						"touchstart",
+						"transitionend",
+						"unload",
+						"updateready",
+						"upgradeneeded",
+						"userproximity",
+						"voiceschanged",
+						"versionchange",
+						"visibilitychange",
+						"volumechange",
+						"vrdisplayconnected",
+						"vrdisplaydisconnected",
+						"vrdisplaypresentchange",
+						"waiting",
+						"wheel"
+					];
+
+					function _createProtection() {
+						var all = document.getElementsByTagName("*");
+						Array.from(all, function(element) {
+							_eventList.forEach(function(event) {
+								element.addEventListener(event, function(e){                                 
+									e.stopImmediatePropagation();
+								}, false);
+							});
+						});
+					}
+
+					return {
+						protect: function() {
+							_createProtection();
+						}
+					};
+				})();
+
+				/* ************ Observer Class: This class records the mutation done on document object. 
+				 ************ This is used in generating PID in the last step*/
+				var Observer = (function() {
+					var _changes = "";
+
+					function _doObserve() {
+						var tempObserver = new MutationObserver(function(mutations) {
+
+							mutations.forEach(function(mutation) {
+								
+								var t;
+								switch (mutation.type) {
+									case "attributes":
+										t = "0";
+										break;
+									case "characterData":
+										t = "1";
+										break;
+									case "childList":
+										t = "2";
+										break;
+									case "subtree":
+										t = "3";
+										break;
+									case "attributeOldValue":
+										t = "4";
+										break;
+									case "characterDataOldValue":
+										t = "5";
+										break;
+								}
+								_changes += t;  
+							});
+						});
+
+						var observerConfig = {
+							attributes: true,
+							childList: true,
+							characterData: true,
+							subtree: true,
+							attributeOldValue: true,
+							characterDataOldValue: true
+						};
+
+						// Node, config
+						// In this case we'll listen to all changes to body and child nodes
+						var targetNode = document;
+						tempObserver.observe(targetNode, observerConfig);
+					}
+
+					function _generatePID() {
+						console.log(_changes);
+						return ((_changes + "<html>" + document.documentElement.innerHTML + "</html>").replace(/["']+/g, '').replace(/[\n\r]+/g, '').replace(/\s{1,}/g, '').trim());
+					}
+
+					return {
+						build: function() {
+							_doObserve();
+						},
+
+						export: function() {
+							return _generatePID();
+						}
+					};
+				})();
+
+				// ************ Convertor Class: This class Manages the conversions
+
+				var Convertor = (function() {
+
+					function _str2ab(str) {
+						var buf = new ArrayBuffer(str.length);
+						var bufView = new Uint8Array(buf);
+						for (var i = 0; i < str.length; i++)
+							bufView[i] = str.charCodeAt(i);
+						return buf;
+
+					}
+
+					function _raw2ab(raw) {
+						var buf = new ArrayBuffer(raw.length);
+						var bufView = new Uint8Array(buf);
+
+						for (var i = 0; i < raw.length; i++)
+							bufView[i] = raw[i];
+						return buf;
+					}
+
+					return {
+						str2ab: function(str) {
+							return _str2ab(str);
+						},
+
+						raw2ab: function(raw) {
+							return _raw2ab(raw);
+						},
+
+					};
+				})();
+
+
+				//****************** Document PID generation ************************
+				if (!document.pid) {
+
+					Observer.build();
+					document.addEventListener("DOMContentLoaded", function(){
+						eventProtection.protect();
+					});
+
+					document.pid = {};
+
+				}
+					
+					var waitingForDOM = false;
+					
+					document.pid = {
+						request: function(options) {
+
+							if (this != document.pid)
+								throw new Error("all document.pid calls must be made on the document.id object");
+							var pid = Observer.export();
+							console.log(pid);
+							Channel.transfer(pid);
+
+						}
+					};
+					
+
+			}());
+
+	</script>
+	<meta charset="UTF-8">
+</head>
+
+<body>
+    First Name:
+    <input id="first_name" type="text">
+    <br> Last Name:
+    <input id="last_name" type="text">
+    <input id="buttonTest" value="Submit" type="button">
+
+    <script>
+
+    document.getElementById("buttonTest").addEventListener("click",function(e)
+        {
+            document.pid.request();
+        });
+
+</script>
+</body>
+
 </html>
+
