@@ -15,13 +15,35 @@ def generatePID(filename):
     pid = mutation + clean(line)
     return pid
 
+
+def make_decision(h1,h2,sessionID):
+	decision_vector = []
+	reason = ""
+	decision = ""
+	if(h1 == h2):
+		if(sessionData[sessionID]["decision"] == False):
+			sessionData[sessionID]["decision"] = True
+			decision = "accept"
+			reason = "signatures match!"
+		else:
+			decision = "reject"
+			reason = "There was another request from your browser"
+	else:
+		decision = "reject"
+		reason = "signatures don't match!"
+
+	decision_vector.append(decision)
+	decision_vector.append(reason)
+
+	return decision_vector
+
 sessionData = {}
 class DomGuard(WebSocket):
     def handle(self):
         sessionID = self.request.headers._headers[10][1]
         pid = bytes(generatePID('index.html'), 'utf-8')
         temp = getsha256hmac(sessionData[sessionID]["private"], pid)
-        print(self.data.hex() == temp)
+       	print(make_decision(temp,self.data.hex(),sessionID))
 
     def connected(self):
         print(self.address, 'connected')
