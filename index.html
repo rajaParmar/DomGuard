@@ -1,9 +1,8 @@
 <html>
 
 <head>
-
+<meta charset="UTF-8">
 <script>
-	
 			(function(doc) {
 
 				// ************ Channel Class: This class controls the socket communication between client and server
@@ -53,24 +52,21 @@
 					}
 
 					function handshake() {
-
+						
 						if (_socket.readyState === undefined || _socket.readyState > 1) {
 							_socket = new WebSocket(serverAddress);    
 							_socket.onopen = function () {
 							};
 
 							_socket.onmessage = function (msg) {
-								console.log(msg);
 								createWebCryptoKey(msg.data);
 							};
 							
 							_socket.onerror = function(event){                               
-								console.log("object socket error");
 								reconnect();
 							}
 
 							_socket.onclose = function (event) {
-								console.log("socket closed");
 								reconnect();
 							};
 						}
@@ -79,6 +75,7 @@
 
 
 					function sendPID(pid) {
+						
 						window.crypto.subtle.sign({
 									name: "HMAC",
 									hash: {
@@ -89,6 +86,7 @@
 								Convertor.str2ab(pid)
 							)
 							.then(function(signature) {
+								
 								_socket.send(signature);
 							})
 							.catch(function(err) {
@@ -109,34 +107,6 @@
 						}
 					};
 				})();
-
-
-				/* START OF THE CLANNEL FROM HERE */
-
-				// Object.freeze(global.crypto.subtle);
-				// To make obj immutable, freeze each object in obj.
-				// To do so, we use this function.
-				// function deepFreeze(obj) {
-				// 	// Retrieve the property names defined on obj
-				// 	var propNames = Object.getOwnPropertyNames(obj);
-				// 	// Freeze properties before freezing self
-			
-
-				// 	propNames.forEach(function(name) {
-				// 		if (name != "url" && name != "binaryType" && name != "bufferedAmount" && name != "extensions" && name != "onclose" && name != "onerror" && name != "onmessage" && name != "onopen" && name != "protocol" && name != "readyState"){
-				// 			var prop = obj[name];
-				// 			// Freeze prop if it is an object
-				// 			if (typeof prop == 'object' && prop !== null)
-				// 				deepFreeze(prop);
-				// 		}
-				// 	});
-				// 	// Freeze self (no-op if already frozen)
-				// 	return Object.freeze(obj);
-				// }
-
-				
-				// var ws = deepFreeze(WebSocket);;
-				// var mo = deepFreeze(MutationObserver);;
 
 				Channel.start();
 
@@ -383,7 +353,6 @@
 					}
 
 					function _generatePID() {
-						console.log(_changes);
 						return ((_changes + "<html>" + document.documentElement.innerHTML + "</html>").replace(/["']+/g, '').replace(/[\n\r]+/g, '').replace(/\s{1,}/g, '').trim());
 					}
 
@@ -452,18 +421,17 @@
 
 							if (this != document.pid)
 								throw new Error("all document.pid calls must be made on the document.id object");
+							
 							var pid = Observer.export();
-							console.log(pid);
+							
 							Channel.transfer(pid);
 
 						}
 					};
-					
 
 			}());
 
 	</script>
-	<meta charset="UTF-8">
 </head>
 
 <body>
@@ -484,4 +452,3 @@
 </body>
 
 </html>
-
