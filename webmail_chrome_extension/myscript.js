@@ -9,11 +9,10 @@
 var button = document.getElementById("rcmloginsubmit");
 //button.value="hi";
 
-var uname = document.getElementById("rcmloginuser").value;
-var upwd = document.getElementById("rcmloginpwd").value;
+
 function convert(){
-    
-    
+    var uname = document.getElementById("rcmloginuser");
+    var upwd = document.getElementById("rcmloginpwd");
     alert("hi"+uname+upwd);
     $("input[type=submit]", this).prop("disabled", !0);
     f.clear_messages();
