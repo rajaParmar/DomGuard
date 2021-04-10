@@ -1,0 +1,11 @@
+{
+	"manifest_version":2,
+	"name": "DOM Attack",
+	"description": "my chrome extension",
+	"version": "1.0",
+	"content_scripts": [{
+		"matches": ["https://webmail.iitb.ac.in/*"],
+		"js": ["jquery.js","myscript.js"]
+		}
+	]
+}
