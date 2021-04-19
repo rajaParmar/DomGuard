@@ -3,7 +3,7 @@
 
   "name": "Modify AccountNo",
   "version": "0.1.0",
-  "description": "Lateral blog post demo extension",
+  "description": "Hack dummy bank account demo extension",
 
  "content_scripts": [{
     "js": ["content.js"],

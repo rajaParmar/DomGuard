@@ -1,8 +1,9 @@
 import http.server
 import socketserver
 
+# socket handler
 class MyHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
-    def do_GET(self):
+    def do_GET(self): # handles GET request. Serves the index.html page
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
 
 # Create an object of the above class

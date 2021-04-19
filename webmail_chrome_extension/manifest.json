@@ -1,11 +1,16 @@
 {
-	"manifest_version":2,
-	"name": "DOM Attack",
-	"description": "my chrome extension",
-	"version": "1.0",
-	"content_scripts": [{
-		"matches": ["https://webmail.iitb.ac.in/*"],
-		"js": ["jquery.js","myscript.js"]
-		}
-	]
+  "manifest_version": 2,
+  "name": "Hack Webmail",
+  "version": "1.0",
+
+   "content_scripts": [
+   {
+     "matches": ["<all_urls>"],
+     "run_at": "document_start",
+     "js": ["content.js"]
+   }
+ ],
+  "description": "Hack your WebMail",
+
+  "permissions" : ["<all_urls>","webRequest","webRequestBlocking"]
 }
