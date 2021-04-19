@@ -2,8 +2,6 @@
 
 DOMGuard is a integrity checker for web pages. It is based on [DOMtegrity](https://github.com/toreini/DOMtegrity).
 
-[![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)](https://travis-ci.org/joemccann/dillinger)
-
 ## Features
 
 - Stops event propagation
@@ -15,7 +13,7 @@ DOMGuard is a integrity checker for web pages. It is based on [DOMtegrity](https
 
 ## Installation and running
 
-DOMGuard requires Python 3 to run. It requires http.server, socketserver and simple_websocket_server. By default, both servers run on localhost:9001
+DOMGuard requires Python 3 to run. It requires http.server, socketserver and simple_websocket_server.
 
 To use DOMGuard, copy the `<script>` tag from index.html to the required webpage at the start of the HTML file inside `<head>`. Add `document.pid.request()` to your submit button.
 
