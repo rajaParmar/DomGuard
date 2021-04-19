@@ -2,18 +2,14 @@
 <html>
     <head>
         <title> Money Transfer </title>
-	<link rel="stylesheet" type="text/css" href="style.css">
 	<meta charset="utf-8">
- 	 <meta name="viewport" content="width=device-width, initial-scale=1">
- 	 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
- 	 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
- 	 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
 	 <script>
 		function postdetails() {
 			var inp1 = document.getElementById("AccountNo").value;
 			var inp2 = document.getElementById("Amount").value;
-			document.getElementById("acno").innerHTML=inp1;
-			document.getElementById("amt").innerHTML=inp2;
+			var p = document.getElementById("msg");
+			//p.setAttribute("type","text");
+			p.innerHTML="Transferred "+inp2+" rupees to "+inp1+" successfully"
 		}
 	</script>
    	<style>
@@ -41,7 +37,6 @@
 		<br> <br>  
 		<button id="SubmitButton" onclick="postdetails()">Submit</button>
 		<br> <br>
-		<p id="acno">Account Number</p>
-		<p id="amt">Amount</p>
+		<p id="msg"></p>
     </body>
 </html>
